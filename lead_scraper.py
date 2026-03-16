@@ -9,15 +9,73 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+ai_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+async def duckduckgo_search(query: str, num_results: int = 8):
+    """Search via DuckDuckGo HTML (no consent walls, no API key needed)."""
+    encoded_query = quote(query)
+    url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
+    
+    async with httpx.AsyncClient(
+        headers={"User-Agent": USER_AGENT},
+        timeout=15.0,
+        follow_redirects=True
+    ) as client:
+        try:
+            response = await client.get(url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            results = []
+            for link in soup.find_all('a', class_='result__a'):
+                href = link.get('href', '')
+                if href.startswith('http') and 'duckduckgo.com' not in href:
+                    results.append(href)
+                if len(results) >= num_results:
+                    break
+            
+            # Also try result__url class
+            if not results:
+                for link in soup.find_all('a', class_='result__url'):
+                    href = link.get('href', '')
+                    if href.startswith('http'):
+                        results.append(href)
+                    if len(results) >= num_results:
+                        break
+            
+            # Fallback: grab all links that look like results
+            if not results:
+                for a in soup.find_all('a', href=True):
+                    href = a['href']
+                    if href.startswith('http') and 'duckduckgo' not in href and 'ad_domain' not in href:
+                        # Filter out DDG internal links
+                        if '//duckduckgo.com' not in href:
+                            results.append(href)
+                    if len(results) >= num_results:
+                        break
+            
+            print(f"[DDG] Query: {query[:60]}... → {len(results)} results")
+            return results
+        except Exception as e:
+            print(f"[DDG] Error searching for '{query[:60]}': {e}")
+            return []
+
 
 async def google_search(query: str, num_results: int = 5):
+    """Google search with consent cookie handling for EU servers."""
     encoded_query = quote(query)
-    url = f"https://www.google.com/search?q={encoded_query}&num={num_results}"
+    url = f"https://www.google.com/search?q={encoded_query}&num={num_results}&hl=en"
     
-    async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}, timeout=10.0) as client:
+    cookies = {"CONSENT": "PENDING+987", "SOCS": "CAESHAgBEhJnd3NfMjAyMzA4MTAtMF9SQzIaAmRlIAEaBgiAo_CmBg"}
+    
+    async with httpx.AsyncClient(
+        headers={"User-Agent": USER_AGENT},
+        cookies=cookies,
+        timeout=15.0,
+        follow_redirects=True
+    ) as client:
         try:
             response = await client.get(url)
             response.raise_for_status()
@@ -27,13 +85,23 @@ async def google_search(query: str, num_results: int = 5):
             for g in soup.find_all('div', class_='g'):
                 anchors = g.find_all('a')
                 if anchors:
-                    link = anchors[0]['href']
+                    link = anchors[0].get('href', '')
                     if link.startswith('http'):
                         results.append(link)
+            
+            print(f"[Google] Query: {query[:60]}... → {len(results)} results")
             return results
         except Exception as e:
-            print(f"Error searching Google for query '{query}': {e}")
+            print(f"[Google] Error for '{query[:60]}': {e}")
             return []
+
+
+async def search(query: str, num_results: int = 5):
+    """Try DuckDuckGo first, fall back to Google."""
+    results = await duckduckgo_search(query, num_results)
+    if not results:
+        results = await google_search(query, num_results)
+    return results
 
 async def extract_lead_info(url: str):
     async with httpx.AsyncClient(headers={"User-Agent": USER_AGENT}, timeout=10.0, follow_redirects=True) as client:
@@ -88,7 +156,7 @@ async def generate_lead_note(lead: dict, icp: dict):
     """
     
     try:
-        response = client.messages.create(
+        response = ai_client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=100,
             messages=[{"role": "user", "content": prompt}],
@@ -104,16 +172,26 @@ async def find_leads(icp_data: dict):
     location = icp_data.get('location', '')
     pain_signals = icp_data.get('pain_signals', [])
 
-    # Build queries
+    # Build diverse search queries
+    title_str = titles[0] if titles else "CEO"
+    pain_str = pain_signals[0] if pain_signals else industry
+    
     queries = [
-        f'"{titles[0]}" "{industry}" "{location}" email contact' if titles else f'"{industry}" "{location}" email contact',
-        f'"{pain_signals[0]}" companies {location}' if pain_signals else f'{industry} companies {location}',
-        f'site:linkedin.com/company "{industry}" "{location}"'
+        f'{industry} companies {location} contact email',
+        f'{title_str} {industry} {location}',
+        f'{pain_str} {location} business',
+        f'{industry} firms {location} impressum',
+        f'{industry} {location} directory',
     ]
+    
+    # Add directory-specific queries
+    if location:
+        queries.append(f'site:gelbeseiten.de {industry} {location}')
+        queries.append(f'{industry} {location} site:wlw.de OR site:firmenwissen.de')
 
     all_urls = []
     for q in queries:
-        urls = await google_search(q, num_results=5)
+        urls = await search(q, num_results=5)
         all_urls.extend(urls)
     
     # Deduplicate and filter out LinkedIn links (for now, focus on company sites)
