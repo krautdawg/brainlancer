@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainLancer | AI Lead Generation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-navy { background-color: #132A3E; }
+        .text-accent { color: #00B3FF; }
+        .bg-accent { background-color: #00B3FF; }
+        .border-accent { border-color: #00B3FF; }
+        .text-highlight { color: #00FFC5; }
+        .bg-highlight { background-color: #00FFC5; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #132A3E 0%, #0a1722 100%);
+        }
+        .step-transition {
+            transition: all 0.3s ease-in-out;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#132A3E',
+                        accent: '#00B3FF',
+                        highlight: '#00FFC5',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen" x-data="app()">
+    
+    <!-- Navbar -->
+    <nav class="bg-navy text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl font-bold tracking-tighter flex items-center">
+                    <span class="text-accent">Brain</span>Lancer 🚀
+                </span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <template x-if="loggedIn">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm font-medium">
+                            Scrapes: <span class="text-highlight" x-text="scrapesRemaining"></span>/10
+                        </span>
+                        <button @click="logout()" class="text-sm hover:text-accent transition">Logout</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-12 px-4 max-w-5xl">
+        
+        <!-- Login Step -->
+        <div x-show="step === 'login'" x-cloak class="flex justify-center items-center py-20">
+            <div class="bg-navy p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700">
+                <h2 class="text-white text-3xl font-bold mb-6 text-center">Welcome Back</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Demo Password</label>
+                        <input type="password" x-model="loginPassword" @keyup.enter="login()" class="w-full bg-gray-800 border border-gray-700 text-white p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition" placeholder="Enter password...">
+                    </div>
+                    <button @click="login()" class="w-full bg-accent hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition transform hover:scale-[1.02] active:scale-95">
+                        Log In
+                    </button>
+                    <p x-show="loginError" x-text="loginError" class="text-red-400 text-sm text-center"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Analyze Website -->
+        <div x-show="step === 'analyze'" x-cloak class="step-transition">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-extrabold text-navy mb-4">Identify Your Ideal Customer</h1>
+                <p class="text-gray-600 text-lg">Enter a website URL to automatically generate an AI-powered ICP.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input type="url" x-model="websiteUrl" class="flex-1 border-2 border-gray-200 p-4 rounded-xl focus:border-accent outline-none transition text-lg" placeholder="https://example.com">
+                    <button @click="analyzeWebsite()" :disabled="loading" class="bg-navy hover:bg-black text-white px-8 py-4 rounded-xl font-bold text-lg transition flex items-center justify-center disabled:opacity-50">
+                        <template x-if="!loading">
+                            <span>Analyze Website</span>
+                        </template>
+                        <template x-if="loading">
+                            <svg class="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </template>
+                    </button>
+                </div>
+                <p x-show="error" x-text="error" class="text-red-500 mt-4 font-medium"></p>
+            </div>
+        </div>
+
+        <!-- Step 2: Edit ICP -->
+        <div x-show="step === 'icp'" x-cloak class="step-transition">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-navy">Refine Your Target Profile</h2>
+                <button @click="step = 'analyze'" class="text-gray-500 hover:text-navy transition flex items-center">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Back
+                </button>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Company Name</label>
+                        <input type="text" x-model="icp.company_name" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Industry</label>
+                        <input type="text" x-model="icp.industry" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Target Titles (comma separated)</label>
+                        <input type="text" x-model="icp.titles_raw" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Location / Region</label>
+                        <input type="text" x-model="icp.location" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Company Size (Min-Max)</label>
+                        <div class="flex gap-4">
+                            <input type="number" x-model="icp.company_size_min" class="w-1/2 border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition">
+                            <input type="number" x-model="icp.company_size_max" class="w-1/2 border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Pain Signals (comma separated)</label>
+                        <input type="text" x-model="icp.pain_signals_raw" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">ICP Description</label>
+                        <textarea x-model="icp.description" rows="3" class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-center">
+                    <button @click="findLeads()" :disabled="loading" class="bg-highlight hover:bg-green-400 text-navy px-12 py-4 rounded-xl font-bold text-xl transition flex items-center justify-center disabled:opacity-50 shadow-lg">
+                        <template x-if="!loading">
+                            <span>Find Leads Now</span>
+                        </template>
+                        <template x-if="loading">
+                            <svg class="animate-spin h-6 w-6 text-navy" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </template>
+                    </button>
+                </div>
+                <p x-show="error" x-text="error" class="text-red-500 mt-4 text-center font-medium"></p>
+            </div>
+        </div>
+
+        <!-- Step 3: Lead Results -->
+        <div x-show="step === 'leads'" x-cloak class="step-transition">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-navy">Qualified Lead CRM</h2>
+                    <p class="text-gray-600">Generated <span x-text="leads.length" class="font-bold text-accent"></span> potential high-value prospects.</p>
+                </div>
+                <div class="flex gap-4">
+                    <button @click="exportCSV()" class="bg-white border-2 border-navy text-navy hover:bg-navy hover:text-white px-6 py-2 rounded-lg font-bold transition flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Export CSV
+                    </button>
+                    <button @click="step = 'analyze'; websiteUrl = ''; icp = {}" class="bg-accent text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-600 transition">
+                        New Search
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Company</th>
+                                <th class="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                                <th class="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Website</th>
+                                <th class="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <template x-for="lead in leads" :key="lead.website">
+                                <tr class="hover:bg-blue-50 transition">
+                                    <td class="p-4">
+                                        <div class="font-bold text-navy" x-text="lead.company_name"></div>
+                                        <div class="text-xs text-gray-400" x-text="lead.phone"></div>
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="text-sm font-medium" x-text="lead.contact_name"></div>
+                                        <div class="text-xs text-accent" x-text="lead.role"></div>
+                                    </td>
+                                    <td class="p-4 text-sm">
+                                        <a :href="'mailto:' + lead.email" class="text-blue-600 hover:underline" x-text="lead.email"></a>
+                                    </td>
+                                    <td class="p-4 text-sm">
+                                        <a :href="lead.website" target="_blank" class="text-gray-400 hover:text-accent transition">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                        </a>
+                                    </td>
+                                    <td class="p-4 text-xs text-gray-600 italic max-w-xs" x-text="lead.notes"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <template x-if="leads.length === 0">
+                    <div class="p-20 text-center text-gray-400">
+                        No leads found yet. Try adjusting your ICP.
+                    </div>
+                </template>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-20 py-12 border-t border-gray-200">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-400 text-sm">© 2026 KI Katapult. All rights reserved.</p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <div class="w-3 h-3 rounded-full bg-navy"></div>
+                <div class="w-3 h-3 rounded-full bg-accent"></div>
+                <div class="w-3 h-3 rounded-full bg-highlight"></div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function app() {
+            return {
+                step: '{{ "analyze" if is_logged_in else "login" }}',
+                loggedIn: {{ "true" if is_logged_in else "false" }},
+                scrapesRemaining: {{ scrapes_remaining }},
+                loginPassword: '',
+                loginError: '',
+                websiteUrl: '',
+                loading: false,
+                error: '',
+                icp: {
+                    company_name: '',
+                    industry: '',
+                    titles_raw: '',
+                    location: '',
+                    company_size_min: 0,
+                    company_size_max: 0,
+                    pain_signals_raw: '',
+                    description: ''
+                },
+                leads: [],
+
+                async login() {
+                    this.loginError = '';
+                    try {
+                        const res = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ password: this.loginPassword })
+                        });
+                        if (res.ok) {
+                            this.loggedIn = true;
+                            this.step = 'analyze';
+                            // Reload to get correct scrapes count from server-side template
+                            window.location.reload();
+                        } else {
+                            this.loginError = 'Invalid password';
+                        }
+                    } catch (e) {
+                        this.loginError = 'Error connecting to server';
+                    }
+                },
+
+                logout() {
+                    // Simple cookie clear for demo
+                    document.cookie = "session_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    window.location.reload();
+                },
+
+                async analyzeWebsite() {
+                    if (!this.websiteUrl) {
+                        this.error = 'Please enter a valid URL';
+                        return;
+                    }
+                    this.loading = true;
+                    this.error = '';
+                    try {
+                        const res = await fetch('/api/analyze', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: this.websiteUrl })
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.icp = {
+                                ...data,
+                                titles_raw: data.titles.join(', '),
+                                pain_signals_raw: data.pain_signals.join(', ')
+                            };
+                            this.step = 'icp';
+                        } else {
+                            const err = await res.json();
+                            this.error = err.detail || 'Analysis failed';
+                        }
+                    } catch (e) {
+                        this.error = 'Network error during analysis';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async findLeads() {
+                    this.loading = true;
+                    this.error = '';
+                    
+                    // Convert raw fields back to arrays
+                    const payload = {
+                        ...this.icp,
+                        titles: this.icp.titles_raw.split(',').map(t => t.trim()),
+                        pain_signals: this.icp.pain_signals_raw.split(',').map(s => s.trim())
+                    };
+
+                    try {
+                        const res = await fetch('/api/scrape', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.leads = data.leads;
+                            this.scrapesRemaining = data.scrapes_remaining;
+                            this.step = 'leads';
+                        } else {
+                            const err = await res.json();
+                            this.error = err.detail || 'Lead generation failed';
+                        }
+                    } catch (e) {
+                        this.error = 'Network error during lead generation';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                exportCSV() {
+                    window.location.href = '/api/leads/csv';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
