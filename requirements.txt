@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-httpx
-beautifulsoup4
-anthropic
-itsdangerous
-jinja2
-python-multipart
-python-dotenv

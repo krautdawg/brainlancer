@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Lead Engine - AI-Powered B2B Lead Generation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Lexend', sans-serif; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+
+    .gradient-border {
+      position: relative;
+      background: linear-gradient(135deg, rgb(15 23 42), rgb(30 41 59));
+      border: 1px solid transparent;
+    }
+
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgb(34 197 94 / 0.5), rgb(16 185 129 / 0.3));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+  <!-- Navigation -->
+  <nav class="bg-slate-800/80 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-3">
+          <div class="bg-green-500 rounded-lg p-2">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-bold">Local Lead Engine</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-slate-400">Powered by <span class="text-green-500 font-semibold">KI Katapult</span></span>
+          <a href="/logout" class="text-sm text-slate-400 hover:text-white transition">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden py-12 px-4">
+    <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-transparent"></div>
+    <div class="max-w-7xl mx-auto text-center relative z-10">
+      <h1 class="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+        Brainlancer MVP
+      </h1>
+      <p class="text-lg md:text-xl text-slate-300">
+        The ultimate toolkit for German freelancers.
+      </p>
+    </div>
+  </section>
+
+  <!-- Tab Navigation -->
+  <div class="max-w-4xl mx-auto px-4 mb-12">
+    <div class="flex space-x-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
+      <button onclick="switchTab('leads')" id="tab-btn-leads" class="flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all duration-200 bg-green-500 text-white shadow-lg">
+        🎯 Local Lead Engine
+      </button>
+      <button onclick="switchTab('vat')" id="tab-btn-vat" class="flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all duration-200 text-slate-400 hover:text-white">
+        🧾 Umsatzsteuer Rechner
+      </button>
+    </div>
+  </div>
+
+  <div id="tab-leads" class="tab-content">
+    <!-- Step 1: ICP Analysis -->
+    <section id="step1" class="py-8 px-4">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+          <div class="inline-block bg-green-500/10 rounded-full px-4 py-2 mb-4">
+            <span class="text-green-500 font-semibold">Step 1</span>
+          </div>
+          <h2 class="text-4xl font-bold mb-4">Define Your Ideal Customer Profile</h2>
+          <p class="text-slate-400">Analyze your website and target market</p>
+        </div>
+
+        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+          <form id="icpForm" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Company Name</label>
+                <input type="text" id="companyName" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Your Company GmbH" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Website</label>
+                <input type="url" id="website" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="https://ki-katapult.de">
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Industry</label>
+                <select id="industry" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                  <option value="Software & SaaS">Software & SaaS</option>
+                  <option value="Consulting">Consulting</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Logistics">Logistics</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Legal">Legal</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="HR & Recruitment">HR & Recruitment</option>
+                  <option value="Construction">Construction</option>
+                  <option value="Healthcare (B2B)">Healthcare (B2B)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Location</label>
+                <input type="text" id="location" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Berlin, Germany" required>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+              Analyze Website & Find Leads
+            </button>
+          </form>
+
+          <!-- Loading State -->
+          <div id="icpLoading" class="hidden mt-8">
+            <div class="bg-slate-900 rounded-xl p-6 border border-slate-700">
+              <div class="flex items-center justify-center mb-6">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-700 border-t-green-500"></div>
+              </div>
+              <h4 class="text-center text-xl font-bold mb-4">Analyzing your website...</h4>
+              <div class="space-y-4">
+                <div id="step1-status" class="flex items-center text-slate-400">
+                  <div class="status-icon mr-3">○</div>
+                  <span>Step 1: Reading website content</span>
+                </div>
+                <div id="step2-status" class="flex items-center text-slate-400">
+                  <div class="status-icon mr-3">○</div>
+                  <span>Step 2: Finding matching companies in directories</span>
+                </div>
+                <div id="step3-status" class="flex items-center text-slate-400">
+                  <div class="status-icon mr-3">○</div>
+                  <span>Step 3: AI scoring and outreach generation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ICP Result -->
+          <div id="icpResult" class="hidden mt-8 space-y-6 fade-in">
+            <div class="bg-gradient-to-br from-green-500/20 to-green-600/10 border border-green-500/30 rounded-xl p-6">
+              <h3 class="text-xl font-bold mb-4 text-green-400">✓ AI Analysis Complete</h3>
+              <div class="grid md:grid-cols-2 gap-6 text-sm">
+                <div>
+                  <div class="text-slate-400 mb-1 uppercase tracking-wider text-xs font-bold">Ideal Customer</div>
+                  <div class="font-medium text-lg" id="icpIdealCustomer"></div>
+                </div>
+                <div>
+                  <div class="text-slate-400 mb-1 uppercase tracking-wider text-xs font-bold">Target Company Size</div>
+                  <div class="font-medium text-lg" id="icpCompanySize"></div>
+                </div>
+                <div class="md:col-span-2">
+                  <div class="text-slate-400 mb-2 uppercase tracking-wider text-xs font-bold">Key Pain Points</div>
+                  <div id="icpPainPoints" class="grid md:grid-cols-2 gap-2"></div>
+                </div>
+                <div class="md:col-span-2">
+                  <div class="text-slate-400 mb-1 uppercase tracking-wider text-xs font-bold">Recommended Industries</div>
+                  <div id="icpRecommendedIndustries" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="leadsContainer" class="space-y-4">
+              <h3 class="text-2xl font-bold mt-8 mb-4">Top Lead Recommendations</h3>
+              <div id="leadsList" class="space-y-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="tab-vat" class="tab-content hidden">
+    <section class="py-8 px-4">
+      <div class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- 1. Setup / Settings panel -->
+        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold flex items-center">
+              <span class="mr-3">⚙️</span> Einstellungen
+            </h2>
+            <a href="/auth/google" class="bg-white hover:bg-slate-100 text-slate-900 font-bold py-2 px-4 rounded-lg flex items-center transition">
+              <img src="https://www.google.com/favicon.ico" class="w-4 h-4 mr-2">
+              Gmail verbinden
+            </a>
+          </div>
+          
+          <form id="vatSettingsForm" class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Steuernummer</label>
+                <input type="text" name="steuernummer" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="12/345/67890">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Voranmeldezeitraum</label>
+                <select name="voranmeldezeitraum" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                  <option value="monthly">Monatlich</option>
+                  <option value="quarterly" selected>Vierteljährlich</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Zeitraum Start</label>
+                <input type="date" name="period_start" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Zeitraum Ende</label>
+                <input type="date" name="period_end" class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+              </div>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg transition">
+              Einstellungen speichern
+            </button>
+          </form>
+        </div>
+
+        <!-- 2. Scan & Upload panel -->
+        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+          <div class="flex flex-col md:flex-row gap-4 mb-8">
+            <button id="scanGmailBtn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center transition transform hover:scale-[1.02]">
+              <span class="mr-2">📧</span> Postfach scannen
+            </button>
+            <div class="flex-1 relative">
+              <input type="file" id="fileUpload" class="hidden" accept=".pdf,image/*">
+              <button onclick="document.getElementById('fileUpload').click()" class="w-full h-full bg-slate-700 hover:bg-slate-600 border-2 border-dashed border-slate-500 rounded-xl py-4 px-6 text-slate-300 flex items-center justify-center transition">
+                <span class="mr-2">📄</span> PDF / Beleg hochladen
+              </button>
+            </div>
+          </div>
+
+          <!-- Scan Progress -->
+          <div id="scanProgress" class="hidden mb-8 space-y-3 bg-slate-900 p-6 rounded-xl border border-slate-700">
+            <div class="flex items-center justify-center mb-4">
+              <div class="animate-spin rounded-full h-8 w-8 border-3 border-slate-700 border-t-green-500"></div>
+            </div>
+            <div id="scan-step-1" class="flex items-center text-slate-400 text-sm">
+                <span class="mr-3">○</span> 📧 Verbinde mit Gmail...
+            </div>
+            <div id="scan-step-2" class="flex items-center text-slate-400 text-sm">
+                <span class="mr-3">○</span> 🔍 Suche Rechnungen...
+            </div>
+            <div id="scan-step-3" class="flex items-center text-slate-400 text-sm">
+                <span class="mr-3">○</span> 🤖 KI analysiert PDFs...
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="text-slate-400 border-b border-slate-700">
+                  <th class="pb-3 font-semibold">Datum</th>
+                  <th class="pb-3 font-semibold">Anbieter</th>
+                  <th class="pb-3 font-semibold">Richtung</th>
+                  <th class="pb-3 font-semibold text-right">Netto</th>
+                  <th class="pb-3 font-semibold text-right">USt%</th>
+                  <th class="pb-3 font-semibold text-right">USt</th>
+                  <th class="pb-3 font-semibold text-right">Brutto</th>
+                  <th class="pb-3 font-semibold text-right">Aktion</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceTableBody">
+                <!-- Invoices will be injected here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. Elster-Assistent -->
+        <div id="elsterAssistent" class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4">
+            <button onclick="window.print()" class="text-slate-400 hover:text-white flex items-center text-xs">
+              <span class="mr-1">📄</span> Als PDF
+            </button>
+          </div>
+          
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold mb-2">🧾 Elster-Ausfüllhilfe</h2>
+            <p class="text-slate-400" id="elsterPeriod">Umsatzsteuer-Voranmeldung [Q1 2025]</p>
+          </div>
+
+          <div class="space-y-8 max-w-lg mx-auto bg-slate-900/50 p-6 rounded-2xl border border-slate-700 font-mono">
+            <div class="text-xs text-slate-500 border-b border-slate-800 pb-4">
+              Öffnen Sie jetzt ElsterOnline und folgen Sie diesen Schritten:
+            </div>
+
+            <div class="space-y-4">
+              <div class="text-xs text-green-500 font-bold uppercase tracking-widest">Schritt 1: Login</div>
+              <div class="text-sm">Gehen Sie auf: <a href="https://www.elster.de/eportal/login" target="_blank" class="text-blue-400 underline">elster.de/login</a></div>
+            </div>
+
+            <div class="space-y-4 pt-4 border-t border-slate-800">
+              <div class="text-xs text-green-500 font-bold uppercase tracking-widest">Schritt 2: Formular wählen</div>
+              <div class="text-sm text-slate-300">Formulare & Leistungen → Alle Formulare → Umsatzsteuer-Voranmeldung</div>
+            </div>
+
+            <div class="space-y-6 pt-4 border-t border-slate-800">
+              <div class="text-xs text-green-500 font-bold uppercase tracking-widest">Schritt 3: Felder ausfüllen</div>
+              
+              <div class="space-y-4">
+                <div class="flex justify-between items-end group">
+                  <div class="flex-1">
+                    <div class="text-[10px] text-slate-500">Kz 81 (Zeile 26)</div>
+                    <div class="text-xs text-slate-300">Lieferungen 19%</div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="text-lg font-bold mr-3" id="kz81_val">0,00 €</div>
+                    <button onclick="copyToClipboard('kz81_val')" class="opacity-0 group-hover:opacity-100 p-1 bg-slate-800 rounded text-[10px] text-green-500 transition">KOPIEREN</button>
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-end group">
+                  <div class="flex-1">
+                    <div class="text-[10px] text-slate-500">Kz 86 (Zeile 35)</div>
+                    <div class="text-xs text-slate-300">Lieferungen 7%</div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="text-lg font-bold mr-3" id="kz86_val">0,00 €</div>
+                    <button onclick="copyToClipboard('kz86_val')" class="opacity-0 group-hover:opacity-100 p-1 bg-slate-800 rounded text-[10px] text-green-500 transition">KOPIEREN</button>
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-end group pt-2 border-t border-slate-800/50">
+                  <div class="flex-1">
+                    <div class="text-[10px] text-slate-500">Kz 66 (Zeile 55)</div>
+                    <div class="text-xs text-slate-300">Abziehbare Vorsteuer</div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="text-lg font-bold mr-3" id="kz66_val">0,00 €</div>
+                    <button onclick="copyToClipboard('kz66_val')" class="opacity-0 group-hover:opacity-100 p-1 bg-slate-800 rounded text-[10px] text-green-500 transition">KOPIEREN</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-6">
+              <div class="bg-slate-950 rounded-xl p-4 border border-slate-700 text-center">
+                <div class="text-[10px] text-slate-500 uppercase mb-1">💰 Vorauszahlung (Kz 83)</div>
+                <div class="text-2xl font-black" id="kz83_val">0,00 €</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Step 3: Lead Enrichment Modal -->
+  <div id="enrichmentModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 overflow-y-auto">
+    <div class="min-h-screen px-4 py-8 flex items-center justify-center">
+      <div class="bg-slate-800 rounded-2xl max-w-4xl w-full border border-slate-700 shadow-2xl">
+        <div class="p-8">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <div class="inline-block bg-green-500/10 rounded-full px-4 py-2 mb-4">
+                <span class="text-green-500 font-semibold">Lead Details</span>
+              </div>
+              <h3 class="text-3xl font-bold mb-2" id="modalCompanyName">Company Name</h3>
+              <p class="text-slate-400" id="modalCompanyInfo">Company Info</p>
+            </div>
+            <button onclick="closeEnrichmentModal()" class="text-slate-400 hover:text-white transition">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-6">
+            <div class="bg-slate-900/50 rounded-xl p-6">
+              <h4 class="font-bold mb-4 text-green-400">🎯 Why they are a fit</h4>
+              <p id="modalReason" class="text-slate-300 text-sm leading-relaxed"></p>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-xl p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="font-bold text-green-400">✉️ AI-Generated Outreach Hook</h4>
+                <button class="text-sm text-green-500 hover:text-green-400 transition" onclick="copyHook()">Copy</button>
+              </div>
+              <div class="bg-slate-800 rounded-lg p-4 text-sm font-mono text-slate-300 italic" id="modalHook"></div>
+            </div>
+
+            <div class="flex gap-4">
+              <a id="modalWebsite" href="#" target="_blank" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center font-semibold py-3 px-6 rounded-lg transition">
+                Visit Website
+              </a>
+              <button onclick="closeEnrichmentModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg transition">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 border-t border-slate-700 py-12 px-4">
+    <div class="max-w-7xl mx-auto text-center">
+      <div class="flex items-center justify-center space-x-3 mb-4">
+        <div class="bg-green-500 rounded-lg p-2">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <span class="text-xl font-bold">Local Lead Engine</span>
+      </div>
+      <p class="text-slate-500 text-sm">&copy; 2026 Local Lead Engine. Powered by KI Katapult.</p>
+    </div>
+  </footer>
+
+  <script>
+    let currentLeads = [];
+
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function setStatus(step, status) {
+      const el = document.getElementById(`step${step}-status`);
+      const icon = el.querySelector('.status-icon');
+      if (status === 'loading') {
+        icon.textContent = '●';
+        icon.classList.add('text-green-500', 'pulse');
+        el.classList.remove('text-slate-400');
+        el.classList.add('text-white');
+      } else if (status === 'done') {
+        icon.textContent = '✓';
+        icon.classList.remove('pulse');
+        icon.classList.add('text-green-500');
+        el.classList.add('text-slate-300');
+      }
+    }
+
+    document.getElementById('icpForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const icpLoading = document.getElementById('icpLoading');
+      const icpResult = document.getElementById('icpResult');
+
+      icpLoading.classList.remove('hidden');
+      icpResult.classList.add('hidden');
+      form.classList.add('hidden');
+
+      setStatus(1, 'loading');
+      
+      // Simulate progress timing for UI
+      setTimeout(() => setStatus(1, 'done'), 2000);
+      setTimeout(() => setStatus(2, 'loading'), 2100);
+      setTimeout(() => setStatus(2, 'done'), 6000);
+      setTimeout(() => setStatus(3, 'loading'), 6100);
+
+      try {
+        const response = await fetch('/api/analyze-icp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            company: document.getElementById('companyName').value,
+            website: document.getElementById('website').value,
+            industry: document.getElementById('industry').value,
+            location: document.getElementById('location').value
+          })
+        });
+
+        if (!response.ok) throw new Error('Analysis failed');
+        const data = await response.json();
+
+        setStatus(3, 'done');
+        setTimeout(() => {
+          icpLoading.classList.add('hidden');
+          icpResult.classList.remove('hidden');
+          displayResults(data);
+        }, 500);
+
+      } catch (error) {
+        alert('Error: ' + error.message);
+        icpLoading.classList.add('hidden');
+        form.classList.remove('hidden');
+      }
+    });
+
+    function displayResults(data) {
+      document.getElementById('icpIdealCustomer').textContent = data.profile.idealCustomer;
+      document.getElementById('icpCompanySize').textContent = data.profile.targetCompanySize;
+      
+      const painPoints = document.getElementById('icpPainPoints');
+      painPoints.innerHTML = data.profile.keyPainPoints.map(p => 
+        `<div class="bg-slate-900/50 p-2 rounded border border-slate-700 flex items-center">
+          <span class="text-green-500 mr-2">✦</span> ${p}
+        </div>`
+      ).join('');
+
+      const industries = document.getElementById('icpRecommendedIndustries');
+      industries.innerHTML = data.profile.recommendedIndustries.map(ind => 
+        `<span class="bg-green-500/10 text-green-500 border border-green-500/30 px-3 py-1 rounded-full text-xs font-semibold">${ind}</span>`
+      ).join('');
+
+      currentLeads = data.companies;
+      const leadsList = document.getElementById('leadsList');
+      leadsList.innerHTML = data.companies.map((company, index) => `
+        <div class="lead-card gradient-border rounded-xl p-6 cursor-pointer hover:scale-[1.01] transition-transform" onclick="expandLead(${index})">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="text-xl font-bold text-white">${company.name}</h4>
+              <p class="text-slate-400 text-sm">${company.location || 'Location available in full report'}</p>
+            </div>
+            <div class="bg-green-500/20 border border-green-500/50 rounded-lg px-3 py-1">
+              <span class="text-green-400 font-bold">${company.score}% Match</span>
+            </div>
+          </div>
+          <p class="mt-4 text-slate-300 text-sm line-clamp-2 italic">"${company.hook}"</p>
+          <div class="mt-4 flex items-center text-green-500 text-sm font-semibold">
+            <span>View Analysis & Outreach Strategy</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function expandLead(index) {
+      const lead = currentLeads[index];
+      document.getElementById('modalCompanyName').textContent = lead.name;
+      document.getElementById('modalCompanyInfo').textContent = lead.location || 'B2B Lead';
+      document.getElementById('modalReason').textContent = lead.reason;
+      document.getElementById('modalHook').textContent = lead.hook;
+      
+      const webBtn = document.getElementById('modalWebsite');
+      if (lead.website) {
+        webBtn.href = lead.website.startsWith('http') ? lead.website : `https://${lead.website}`;
+        webBtn.classList.remove('hidden');
+      } else {
+        webBtn.classList.add('hidden');
+      }
+
+      document.getElementById('enrichmentModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEnrichmentModal() {
+      document.getElementById('enrichmentModal').classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+
+    function copyHook() {
+      const hook = document.getElementById('modalHook').textContent;
+      navigator.clipboard.writeText(hook);
+      alert('Hook copied to clipboard!');
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      // Update button styles
+      const btnLeads = document.getElementById('tab-btn-leads');
+      const btnVat = document.getElementById('tab-btn-vat');
+
+      if (tabId === 'leads') {
+        btnLeads.className = 'flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all duration-200 bg-green-500 text-white shadow-lg';
+        btnVat.className = 'flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all duration-200 text-slate-400 hover:text-white';
+      } else {
+        btnVat.className = 'flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all duration-200 bg-green-500 text-white shadow-lg';
+        btnLeads.className = 'flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all duration-200 text-slate-400 hover:text-white';
+        loadInvoices(); // Trigger load when switching to VAT
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeEnrichmentModal();
+    });
+  </script>
+  <script src="/js/vat-ui.js"></script>
+</body>
+</html>
