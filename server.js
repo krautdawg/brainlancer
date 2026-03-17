@@ -342,9 +342,10 @@ If website scraping failed, base your analysis on the industry and location prov
 
     const anthropicData = await anthropicRes.json();
     const rawContent = anthropicData.content[0].text;
-    // Strip markdown code fences if present
-    const jsonStr = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/,'').trim();
-    const result = JSON.parse(jsonStr);
+    // Extract JSON object from response (handles code fences, trailing text, etc.)
+    const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON object found in AI response');
+    const result = JSON.parse(jsonMatch[0]);
 
     res.json(result);
 
