@@ -13,6 +13,9 @@ const PORT = process.env.PORT || 3000;
 const PASSWORD = process.env.APP_PASSWORD || 'brainlancer2026';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
+// Trust reverse proxy (Coolify/Caddy)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
