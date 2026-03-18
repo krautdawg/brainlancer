@@ -1,82 +1,100 @@
 import httpx
 from bs4 import BeautifulSoup
-import anthropic
 import json
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+PPLX_API_KEY = os.getenv("PPLX_API_KEY")
+PPLX_BASE = "https://api.perplexity.ai"
 
 async def scrape_website_content(url: str) -> str:
-    async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    async with httpx.AsyncClient(timeout=10.0, follow_redirects=True, headers=headers) as client:
         try:
             response = await client.get(url)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Remove script and style elements
-            for script_or_style in soup(["script", "style"]):
-                script_or_style.decompose()
-
-            # Extract meaningful text
-            text_blocks = []
-            
-            # Title & Meta Description
+            for tag in soup(["script", "style", "nav", "footer"]):
+                tag.decompose()
+            blocks = []
             if soup.title:
-                text_blocks.append(f"Title: {soup.title.string}")
-            
-            meta_desc = soup.find("meta", attrs={"name": "description"})
-            if meta_desc:
-                text_blocks.append(f"Meta Description: {meta_desc.get('content')}")
-
-            # Headings
-            for h in soup.find_all(['h1', 'h2', 'h3']):
-                text_blocks.append(h.get_text().strip())
-
-            # Paragraphs (limit to first few to avoid bloat)
-            for p in soup.find_all('p')[:10]:
-                text_blocks.append(p.get_text().strip())
-
-            return "\n".join([b for b in text_blocks if b])
+                blocks.append(f"Title: {soup.title.string}")
+            meta = soup.find("meta", attrs={"name": "description"})
+            if meta:
+                blocks.append(f"Description: {meta.get('content', '')}")
+            for h in soup.find_all(['h1', 'h2', 'h3'])[:8]:
+                t = h.get_text().strip()
+                if t:
+                    blocks.append(t)
+            for p in soup.find_all('p')[:12]:
+                t = p.get_text().strip()
+                if t:
+                    blocks.append(t)
+            return "\n".join(blocks)[:3000]
         except Exception as e:
             print(f"Error scraping {url}: {e}")
-            return f"Error: Could not fetch website content for {url}"
-
-async def generate_icp(url: str, content: str):
-    prompt = f"""
-    Analyze this B2B company's website content. Generate an Ideal Customer Profile (ICP) for who their best customers would be.
-    Return JSON with: company_name, industry, titles (array of job titles to target), location (their operating region), company_size_min, company_size_max, pain_signals (array of keywords/phrases their ideal customers would search for), description (2-3 sentence ICP summary).
-
-    Website Content:
-    {content}
-    """
-    
-    try:
-        response = client.messages.create(
-            model="claude-3-haiku-20240307",
-            max_tokens=1024,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            system="You are an expert B2B marketing strategist. Output ONLY valid JSON."
-        )
-        
-        # Extract JSON from response
-        res_text = response.content[0].text
-        # Clean up in case Claude adds markdown
-        if "```json" in res_text:
-            res_text = res_text.split("```json")[1].split("```")[0].strip()
-        
-        icp_data = json.loads(res_text)
-        icp_data['website_url'] = url
-        icp_data['raw_ai_output'] = res_text
-        return icp_data
-    except Exception as e:
-        print(f"Error generating ICP: {e}")
-        return None
+            return f"Could not fetch {url}"
 
 async def analyze_website(url: str):
+    """Scrape website + use Perplexity with web search to generate rich ICP."""
     content = await scrape_website_content(url)
-    return await generate_icp(url, content)
+
+    prompt = f"""Analyze this company's website and use web search to find additional information about them.
+
+Website URL: {url}
+Website Content:
+{content}
+
+Based on this, generate a detailed B2B Ideal Customer Profile (ICP) — who are their best potential customers?
+
+Return ONLY valid JSON with these exact keys:
+{{
+  "company_name": "name of the company at {url}",
+  "industry": "the industry their ideal customers are in",
+  "titles": ["Job Title 1", "Job Title 2", "Job Title 3"],
+  "location": "target location/region (e.g. Germany, Berlin, DACH)",
+  "company_size_min": 5,
+  "company_size_max": 200,
+  "pain_signals": ["pain point 1", "pain point 2", "pain point 3"],
+  "description": "2-3 sentence summary of ideal customer profile"
+}}"""
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{PPLX_BASE}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {PPLX_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "sonar",
+                    "messages": [
+                        {"role": "system", "content": "You are a B2B marketing strategist. Output ONLY valid JSON, no markdown."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "max_tokens": 1024,
+                    "temperature": 0.2
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+            res_text = data["choices"][0]["message"]["content"].strip()
+
+            # Strip markdown if present
+            if "```" in res_text:
+                res_text = res_text.split("```")[1]
+                if res_text.startswith("json"):
+                    res_text = res_text[4:]
+                res_text = res_text.strip()
+
+            icp_data = json.loads(res_text)
+            icp_data['website_url'] = url
+            print(f"[PPLX] ICP generated for {url}: {icp_data.get('company_name')}")
+            return icp_data
+
+    except Exception as e:
+        print(f"[PPLX] Error generating ICP: {e}")
+        return None
